@@ -32,6 +32,8 @@ set(SHARED_SOURCES
     src/core/interrupt_filter_engine.cpp
     src/core/hardware_diagnostic_pipeline.cpp
     src/server/attested_network_transport.cpp
+    src/boot/linux_module_wrapper.c
+    src/boot/windows_driver_wrapper.c
 )
 
 set(ASM_SOURCES src/boot/bootloader.asm)
