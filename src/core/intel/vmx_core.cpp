@@ -8,6 +8,10 @@
 #include <cstdint>
 #include <cstdlib>
 
+#if defined(_MSC_VER)
+#include <intrin.h> // Required for Microsoft native hypervisor intrinsics
+#endif
+
 constexpr uint64_t EXIT_REASON_EXTERNAL_INTERRUPT = 1;
 constexpr uint64_t EXIT_REASON_VMCALL             = 18;
 constexpr uint64_t EXIT_REASON_CR_ACCESS          = 28;
@@ -33,25 +37,39 @@ private:
 
     uint64_t ReadVMCSField(uint64_t field) {
         uint64_t value = 0;
+        #if defined(_MSC_VER)
+        // FIXED MSVC ARCHITECTURE COMPLIANCE: Native MSVC intrinsic for VMREAD
+        __vmx_vmread(field, &value);
+        #else
         __asm__ __volatile__("vmread %1, %0" : "=r"(value) : "r"(field) : "cc");
+        #endif
         return value;
     }
 
     void WriteVMCSField(uint64_t field, uint64_t value) {
-        __asm__ __volatile__("vmwrite %0, %1" : : "r"(value), "r"(field) : "cc");
+        #if defined(_MSC_VER)
+        // FIXED MSVC ARCHITECTURE COMPLIANCE: Native MSVC intrinsic for VMWRITE
+        __vmx_vmwrite(field, value);
+        #else
+        __asm__ __volatile__("vmwriteq %0, %1" : : "r"(value), "r"(field) : "cc");
+        #endif
     }
 
     void FlushIntelSecureContext(uint64_t ept_pointer) {
         #if defined(__x86_64__)
-        // FIXED INVVPID SYNTAX: Formatted register inputs to align perfectly with AT&T x86_64 constraint flags
         uint64_t invvpid_type = 1; 
         struct { uint64_t vpid; uint64_t linear_address; } inv_descriptor = { ept_pointer, 0 };
+        #if defined(_MSC_VER)
+        // FIXED MSVC ARCHITECTURE COMPLIANCE: Native MSVC intrinsic for INVVPID
+        __vmx_invvpid(static_cast<int>(invvpid_type), &inv_descriptor);
+        #else
         __asm__ __volatile__(
             "invvpid (%0), %1"
             :
             : "r"(&inv_descriptor), "r"(invvpid_type)
             : "cc", "memory"
         );
+        #endif
         #else
         (void)ept_pointer;
         #endif
