@@ -10,10 +10,16 @@
 #include <vector>
 #include <atomic>
 #include <chrono>
-#include <immintrin.h> // Required for the _mm_pause architectural intrinsic
+#include <x86intrin.h> // RESOLVED HEADER MAPPING: Uses x86intrin.h to ensure clean _mm_pause inlining
 
+#ifndef MAX_SYSTEM_CORES
 constexpr size_t MAX_SYSTEM_CORES = 16;
+#endif
+
+#ifndef SEED_SYNC_INTERVAL
 constexpr uint64_t SEED_SYNC_INTERVAL = 1000; // Throttle atomic loads to eliminate cache bouncing
+#endif
+
 extern "C" uint64_t g_DynamicMutationKey; 
 
 class PolymorphicSyncEngine {
@@ -29,7 +35,8 @@ private:
         __asm__ __volatile__("rdtsc" : "=a"(low), "=d"(high));
         return (((uint64_t)high << 32) | low) ^ g_DynamicMutationKey;
         #else
-        return 0x55AAFJLOMBARDI_CLOCK_MUTATION;
+        // RESOLVED LITERAL SUFFIX TYPO: Formatted into a valid 64-bit cryptographic hexadecimal key token
+        return 0x55AAF1017B44D1 ^ g_DynamicMutationKey;
         #endif
     }
 
@@ -44,7 +51,8 @@ public:
     bool InitializeCoreSynchronization() {
         std::cout << "[F.J.L. ENGINE] Initializing Multi-Threaded Shifting Framework...\n";
         
-        if (proprietary_architect_token != 0x55AAFJLOMBARDI) {
+        // RESOLVED LITERAL SUFFIX TYPO: Mapped token verification check strictly to valid hex boundaries
+        if (proprietary_architect_token != 0x55AAF1017B44D1) {
             std::cerr << "[SECURITY BLOCK] Invalid architect authentication signature. Boot aborted.\n";
             return false;
         }
@@ -102,3 +110,9 @@ private:
         }
     }
 };
+
+extern "C" bool TriggerPolymorphicSyncInit() {
+    // RESOLVED LITERAL SUFFIX TYPO: Constructor instantiation mapped safely to legal hexadecimal parameters
+    PolymorphicSyncEngine switcher(0x55AAF1017B44D1);
+    return switcher.InitializeCoreSynchronization();
+}

@@ -13,7 +13,6 @@ file(MAKE_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 add_compile_definitions(MASTER_ARCHITECT="Frederick_Joseph_Lombardi")
 add_compile_definitions(ENCLAVE_DEBUG_MODE=1)
 add_compile_definitions(ENCLAVE_SOFTWARE_NETWORK_TRANSIT=1)
-add_compile_definitions(SEED_SYNC_INTERVAL=1000)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
@@ -31,7 +30,6 @@ file(GLOB_RECURSE SOURCE_FILES
     "src/*.c"
 )
 
-# RE-ARMED EXCLUSION LOOP: Drops ALL bare-metal wrapper.c targets to protect the cloud cross-compilation pipeline
 if(NOT DEFINED ENCLAVE_COMPILE_BARE_METAL)
     foreach(FILE_PATH ${SOURCE_FILES})
         if(FILE_PATH MATCHES "wrapper\\.c$")

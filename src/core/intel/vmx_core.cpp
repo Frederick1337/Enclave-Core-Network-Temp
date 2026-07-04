@@ -43,11 +43,11 @@ private:
 
     void FlushIntelSecureContext(uint64_t ept_pointer) {
         #if defined(__x86_64__)
-        // FIXED ASSEMBLER INTERFACE: Appends 'q' prefix and forces clean pointer memory formatting
+        // FIXED INVVPID SYNTAX: Formatted register inputs to align perfectly with AT&T x86_64 constraint flags
         uint64_t invvpid_type = 1; 
         struct { uint64_t vpid; uint64_t linear_address; } inv_descriptor = { ept_pointer, 0 };
         __asm__ __volatile__(
-            "invvpidq (%0), %1"
+            "invvpid (%0), %1"
             :
             : "r"(&inv_descriptor), "r"(invvpid_type)
             : "cc", "memory"
