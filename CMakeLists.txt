@@ -40,7 +40,6 @@ endif()
 
 # Gather master core hypervisor tracking files and interface sources
 set(SOURCE_FILES
-    src/main.cpp
     src/common/enclave_integration.h
     src/common/enclave_hypercall.h
     src/core/vmx_core.cpp
@@ -49,6 +48,13 @@ set(SOURCE_FILES
     src/core/polymorphic_sync_engine.cpp
     src/network/attested_network_transport.cpp
 )
+
+# Verify if an internal core/main.cpp entry exists, otherwise compilation hooks initialize from wrappers
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/core/main.cpp")
+    list(APPEND SOURCE_FILES src/core/main.cpp)
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+    list(APPEND SOURCE_FILES src/main.cpp)
+endif()
 
 # Conditionally append the correct operational bare-metal kernel driver wrapper
 if(WIN32)
