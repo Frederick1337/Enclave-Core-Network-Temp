@@ -15,22 +15,23 @@ class AttestedNetworkTransport {
 private:
     uint64_t master_token;
     std::atomic<uint64_t> current_epoch_id;
-    uint64_t software_epoch_keys; // Sliding Window Cache: [En-1], [En], [En+1]
+    uint64_t software_epoch_keys[3]; // Explicit Sliding Window Cache Matrix Array
 
 public:
     AttestedNetworkTransport(uint64_t token) 
         : master_token(token), current_epoch_id(45) {
         // Derive rolling keys locally based on host hardware seed
-        software_epoch_keys = g_DynamicMutationKey ^ 0xAAAA; // En-1
-        software_epoch_keys = g_DynamicMutationKey ^ 0xBBBB; // En
-        software_epoch_keys = g_DynamicMutationKey ^ 0xCCCC; // En+1
+        software_epoch_keys[0] = g_DynamicMutationKey ^ 0xAAAA; // En-1 (Slot 0)
+        software_epoch_keys[1] = g_DynamicMutationKey ^ 0xBBBB; // En   (Slot 1)
+        software_epoch_keys[2] = g_DynamicMutationKey ^ 0xCCCC; // En+1 (Slot 2)
     }
 
     // Encrypts outgoing memory data frames via 50ms software rolling cipher
     void SecureAndTransmitFrame(uint8_t* raw_payload, size_t size, uint8_t* output_packet) {
-        if (master_token != 0x55AAFJLOMBARDI) return;
+        // RESOLVED LITERAL SUFFIX TYPO: Token mapped to a valid 64-bit cryptographic hexadecimal format
+        if (master_token != 0x55AAF1017B44D1) return;
 
-        uint64_t active_key = software_epoch_keys; // Target Current Epoch Key
+        uint64_t active_key = software_epoch_keys[1]; // Target Current Epoch Key (Slot 1)
         uint64_t current_epoch = current_epoch_id.load(std::memory_order_relaxed);
 
         // Stamp unencrypted metadata Epoch Tag onto the header
@@ -52,11 +53,11 @@ public:
 
         // Sliding Window Key Selection Logic
         if (packet_epoch == current_epoch) {
-            decryption_key = software_epoch_keys; // Current
+            decryption_key = software_epoch_keys[1]; // Current (Slot 1)
         } else if (packet_epoch == current_epoch - 1) {
-            decryption_key = software_epoch_keys; // Previous
+            decryption_key = software_epoch_keys[0]; // Previous (Slot 0)
         } else if (packet_epoch == current_epoch + 1) {
-            decryption_key = software_epoch_keys; // Next
+            decryption_key = software_epoch_keys[2]; // Next (Slot 2)
         } else {
             std::cerr << "[TRANSPORT DROPPED] Packet out of sliding window epoch sync.\n";
             return false; 
@@ -71,6 +72,7 @@ public:
 };
 
 extern "C" void ExecuteSoftwareNetworkSync(uint8_t* data, size_t len, uint8_t* out) {
-    AttestedNetworkTransport transport(0x55AAFJLOMBARDI);
+    // RESOLVED LITERAL SUFFIX TYPO: Constructor argument mapped safely to legal hexadecimal parameters
+    AttestedNetworkTransport transport(0x55AAF1017B44D1);
     transport.SecureAndTransmitFrame(data, len, out);
 }
