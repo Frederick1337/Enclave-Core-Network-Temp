@@ -43,11 +43,11 @@ private:
 
     void FlushIntelSecureContext(uint64_t ept_pointer) {
         #if defined(__x86_64__)
-        // RESOLVED OPERAND SIZE MISMATCH: Formatted to map explicit indirect memory array registers natively
+        // FIXED ASSEMBLER INTERFACE: Appends 'q' prefix and forces clean pointer memory formatting
         uint64_t invvpid_type = 1; 
         struct { uint64_t vpid; uint64_t linear_address; } inv_descriptor = { ept_pointer, 0 };
         __asm__ __volatile__(
-            "invvpid %1, (%0)"
+            "invvpidq (%0), %1"
             :
             : "r"(&inv_descriptor), "r"(invvpid_type)
             : "cc", "memory"
@@ -68,10 +68,9 @@ public:
         }
 
         if (exit_reason == EXIT_REASON_EXTERNAL_INTERRUPT) {
-            uint32_t trapped_vector = 0x2C; // Extract mouse vector from Interruption Info
+            uint32_t trapped_vector = 0x2C; 
             bool pass_to_os = RunHardwareInterruptAudit(trapped_vector, true, nullptr);
             if (!pass_to_os) {
-                // Advance RIP over the exit boundary to drop the interrupt cleanly
                 uint64_t rip = ReadVMCSField(VMCS_GUEST_RIP);
                 uint64_t insn_len = ReadVMCSField(VMCS_EXIT_INSN_LEN);
                 WriteVMCSField(VMCS_GUEST_RIP, rip + insn_len);

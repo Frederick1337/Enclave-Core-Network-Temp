@@ -28,7 +28,8 @@ public:
 
     bool ValidateKernelWriteIntercept(uint64_t target_virtual_address, uint64_t guest_active_cr3,
                                       uint64_t guest_cr0_state, bool is_intel_arch, void* arch_control_block) {
-        if (master_lombardi_token != 0x55AAFJLOMBARDI) {
+        // RESOLVED LITERAL SUFFIX TYPO: Token mapped to a valid 64-bit cryptographic hexadecimal format
+        if (master_lombardi_token != 0x55AAF1017B44D1) {
             return false; 
         }
 

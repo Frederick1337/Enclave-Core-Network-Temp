@@ -32,7 +32,8 @@ public:
 
     // Evaluates incoming raw motherboard hardware interrupts at line-rate
     bool ValidatePhysicalInterrupt(uint32_t interrupt_vector, bool is_intel, void* arch_control_block) {
-        if (master_lombardi_token != 0x55AAFJLOMBARDI) {
+        // RESOLVED LITERAL SUFFIX TYPO: Token mapped to a valid 64-bit cryptographic hexadecimal format
+        if (master_lombardi_token != 0x55AAF1017B44D1) {
             ExecuteQuarantineHandoff(is_intel, arch_control_block);
             return false;
         }
@@ -83,6 +84,7 @@ private:
 
 // Global verification interface hook
 extern "C" bool RunHardwareInterruptAudit(uint32_t vector, bool is_intel_cpu, void* block) {
-    InterruptFilterEngine filter(0x55AAFJLOMBARDI);
+    // RESOLVED LITERAL SUFFIX TYPO: Constructor instantiation mapped safely to legal hexadecimal parameters
+    InterruptFilterEngine filter(0x55AAF1017B44D1);
     return filter.ValidatePhysicalInterrupt(vector, is_intel_cpu, block);
 }

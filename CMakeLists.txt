@@ -15,7 +15,6 @@ add_compile_definitions(ENCLAVE_DEBUG_MODE=1)
 add_compile_definitions(ENCLAVE_SOFTWARE_NETWORK_TRANSIT=1)
 add_compile_definitions(SEED_SYNC_INTERVAL=1000)
 
-# FORCE THE ELIMINATION OF POSITION INDEPENDENT CONFLICTS FOR KERNEL MODE CODE
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
 if(MSVC)
@@ -27,17 +26,15 @@ else()
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
 endif()
 
-# AUTOMATED PATH DISCOVERY LAYER: Recursively maps existing source files
 file(GLOB_RECURSE SOURCE_FILES 
     "src/*.cpp" 
     "src/*.c"
 )
 
-# KERNEL WRAPPER EXCLUSION GATEWAY: Removes bare-metal boot files from the build array 
-# unless explicitly compiling in a true bare-metal kernel-level build ecosystem.
+# RE-ARMED EXCLUSION LOOP: Drops ALL bare-metal wrapper.c targets to protect the cloud cross-compilation pipeline
 if(NOT DEFINED ENCLAVE_COMPILE_BARE_METAL)
     foreach(FILE_PATH ${SOURCE_FILES})
-        if(FILE_PATH MATCHES "src/boot/")
+        if(FILE_PATH MATCHES "wrapper\\.c$")
             list(REMOVE_ITEM SOURCE_FILES ${FILE_PATH})
         endif()
     endforeach()
