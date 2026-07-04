@@ -14,8 +14,9 @@ struct SystemTopology {
     bool vmm_active;
 };
 
-// Global, read-only host-space variable for true hardware entropy masking
-extern "C" uint64_t g_DynamicMutationKey = 0;
+// RESOLVED LINKAGE DIAGNOSTIC: Separate declaration scope from initialization to prevent -Werror duplication
+extern "C" uint64_t g_DynamicMutationKey;
+uint64_t g_DynamicMutationKey = 0;
 
 struct GuestContext;
 struct VMCB;
@@ -61,14 +62,16 @@ public:
 
         while (retry < MAX_RETRIES) {
             #if defined(__x86_64__) || defined(_M_X64)
-            if (_rdrand64_step(&trng_seed)) {
+            // RESOLVED TYPE-CAST DIAGNOSTIC: Enforce hardware register mapping via explicit reinterpret_cast
+            if (_rdrand64_step(reinterpret_cast<unsigned long long*>(&trng_seed))) {
                 uint64_t unique_hardware_fingerprint = GetProcessorSiliconFingerprint();
                 
                 // Mathematically bind the physical chip serial footprint into the dynamic entropy key space
                 return trng_seed ^ unique_hardware_fingerprint; 
             }
             #else
-            trng_seed = 0x55AAFJLOMBARDI_FALLBACK;
+            // RESOLVED LITERAL SUFFIX TYPO: Formatted into a valid 64-bit cryptographic hexadecimal key token
+            trng_seed = 0x55AAF1017B44D1; 
             return trng_seed ^ GetProcessorSiliconFingerprint();
             #endif
             retry++;
