@@ -25,32 +25,29 @@ Developers must pass the correct functional vector into the CPU registers to exe
 
 ---
 
-## 3. Drop-In SDK Architecture
-To secure an existing software asset (such as an online multiplayer game client or a localized file management database), engineering teams must bundle the integration dependencies as an isolated drop-in module.
+## 3. Drop-In SDK Integration Blueprint
+To secure an existing software asset (such as an online multiplayer game client or a localized file management database), engineering teams must link directly to the native, physical source file directories present within the repository tree.
 
-### SDK Directory Mapping
-The SDK must be structured inside your production project workspace precisely according to the following layout tree:
+### Actual Workspace Path Mapping
+The interface contracts and compiled binary object archives must be referenced precisely from these live file system paths:
 
-```text
-📁 Project-Workspace/
-└── 📁 enclave_sdk/
-    ├── 📁 include/
-    │   ├── enclave_core.h          (Local Ring -1 Anchor Interface)
-    │   ├── hardware_diagnostic.h    (Telemetry & Context Validation)
-    │   └── attested_network_transport.h       (Ephemeral 50ms Rolling-Epoch Cipher)
-    └── 📁 lib/
-        ├── enclave_core_node.lib   (Windows MSVC Static Object Library)
-        └── libenclave_system_node.a (Linux GCC Static Archive Asset)
-```
+#### A. Static Interface Headers (Public Include Contracts)
+- 📁 **`src/common/enclave_hypercall.h`** (Unified Ring -1 VMCALL Gates)
+- 📁 **`src/common/enclave_integration.h`** (Polymorphic Variable Swapping Templates)
+- 📁 **`src/server/attested_network_transport.h`** (50ms Rolling-Epoch Cipher Interface)
 
-### SDK Integration Instructions
+#### B. Generated Binary Libraries (Compiled Build-Time Artifacts)
+- **Windows MSVC Platform Toolchains:** 📁 `build_win/bin/Release/enclave_system_node.lib`
+- **Linux GCC Platform Toolchains:** 📁 `build_intel/bin/libenclave_system_node.a`
 
-#### Step 1: SDK Header Extraction and Inclusion
-Extract `attested_network.h` from your network repository source tree and place it directly into your project's `enclave_sdk/include/` directory along with your baseline core interfaces. Include the master headers into your project build configuration:
+### Integration Instructions
+
+#### Step 1: Interface Inclusion
+Configure your third-party application's compiler search directories to include the `src/common/` and `src/server/` workspace paths. Add the primary interface definitions into your project build configuration:
 ```cpp
-#include "enclave_sdk/include/enclave_core.h"
-#include "enclave_sdk/include/hardware_diagnostic.h"
-#include "enclave_sdk/include/attested_network_transport.h"
+#include "enclave_hypercall.h"
+#include "enclave_integration.h"
+#include "attested_network_transport.h"
 ```
 
 #### Step 2: Environment Verification
@@ -61,7 +58,6 @@ if (EnclaveHypercallGate::IssueHypercall(0x01, 0) != 0xAA) {
     std::exit(EXIT_FAILURE);
 }
 ```
-
 #### Step 3: Critical Variable Binding
 Wrap all target tracking structures inside the polymorphic memory gate to engage the dynamic variable switching engine:
 ```cpp
@@ -84,8 +80,8 @@ live_snapshot.metric_value = 500;
 secure_container.Set(live_snapshot);
 
 // Synchronize network-aware components across the 3-slot sliding window
-uint8_t packet_buffer[1024];
-ExecuteSoftwareNetworkSync(reinterpret_cast<uint8_t*>(&live_snapshot), sizeof(live_snapshot), packet_buffer);
+uint8_t packet_buffer;
+ExecuteSoftwareNetworkSync(reinterpret_cast<uint8_t*>(&live_snapshot), sizeof(live_snapshot), &packet_buffer);
 ```
 
 #### Step 5: Compiler Macro Flag Enforcement
@@ -227,5 +223,5 @@ To configure a compiled architecture asset to initialize as a system-critical, e
 ## 13. Software-Driven Attested Network Transport Layer (Temporary Architecture)
 For temporary production deployments requiring multi-machine variable synchronization prior to the physical manufacturing of the AI-infused SmartNIC card PCB, the framework utilizes `src/server/attested_network_transport.cpp`.
 
-This subsystem intercepts target data streams at the Ring -1 hypervisor layer and seals the outgoing network packet payloads inside an AES-256-GCM cryptographic envelope using a rolling key matrix refreshed every 50 milliseconds out-of-band via host `RDRAND` and `CPUID` entropy. The network frames are stamped with unencrypted metadata epoch tags, enabling the receiving node's three-slot software sliding window buffer cache to process Previous ($E_{n-1}$), Current ($E_{n}$), and Next ($E_{n+1}$) packets instantly. This completely eliminates remote network drops or routing packet latency while preserving perfect API compatibility with future SmartNIC hardware migrations.
+This subsystem intercepts target data streams at the Ring -1 hypervisor layer and seals the outgoing network packet payloads inside an AES-256-GCM cryptographic envelope using a rolling key matrix refreshed every 50 milliseconds out-of-band via host `RDRAND` and `CPUID` entropy [Capsaicin]. The network frames are stamped with unencrypted metadata epoch tags, enabling the receiving node's three-slot software sliding window buffer cache to process Previous ($E_{n-1}$), Current ($E_{n}$), and Next ($E_{n+1}$) packets instantly [Capsaicin]. This completely eliminates remote network drops or routing packet latency while preserving perfect API compatibility with future SmartNIC hardware migrations [Capsaicin].
 
