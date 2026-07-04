@@ -22,8 +22,8 @@ if(MSVC)
     add_compile_options(/W4 /WX /GR- /EHs-c- /GS- /wd4201 /std:c++20 /Oi)
     add_link_options(/DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry)
 else()
-    # ENFORCED HARDWARE INSTRUCTION ALIGNMENT: Added -mrdrand to resolve function inlining blocks
-    add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie -mrdrand)
+    # FIXED TARGET COMPILATION FLAG: Changed -mrdrand to the correct compiler argument -mrdrnd
+    add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie -mrdrnd)
     
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
