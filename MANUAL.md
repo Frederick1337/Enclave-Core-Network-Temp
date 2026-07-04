@@ -109,7 +109,12 @@ Once your source compilation is complete, you must explicitly instruct your proj
 
 ---
 
-## 4. Multi-Environment Target Build Protocols
+## 4. Hardware Stress-Testing Diagnostics
+To ensure integration compliance, compiled applications should be run inside a dedicated testing sandbox alongside the `tests/hardware_diagnostic_pipeline.py` routine. The test environment maps real-time latency variations and verifies that external memory-scraping attempts return pure cryptographic noise, confirming full deployment integrity.
+
+---
+
+## 5. Multi-Environment Target Build Protocols
 
 Project Enclave utilizes a dual-mode compilation switch design. By generating isolated workspace folders and toggling build-time parameters, the exact same C++ logic core can be output as an analytical user-space test engine or a low-level bare-metal kernel driver layer.
 
@@ -147,11 +152,6 @@ cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DENCLAVE_COMPILE_BARE_METAL=1 ..
 cmake --build . --config Release
 ```
 *Target Production Output:* `build_win_driver/bin/Release/enclave_core_node.sys`
-
----
-
-## 5. Hardware Stress-Testing Diagnostics
-To ensure integration compliance, compiled applications should be run inside a dedicated testing sandbox alongside the `tests/hardware_diagnostic_pipeline.py` routine. The test environment maps real-time latency variations and verifies that external memory-scraping attempts return pure cryptographic noise, confirming full deployment integrity.
 
 ---
 
@@ -262,7 +262,12 @@ To configure a compiled architecture asset to initialize as a system-critical, e
    > sudo reboot
    > sudo journalctl -u enclave_boot.service --no-pager
 
-### B. Windows Early-Launch Initialization (ELAM Matrix)
+---
+
+## 14. Early-Launch Service Initialization Protocols (ELAM Matrix)
+To force the local host computer to load and initialize Project Enclave's kernel-mode components ahead of third-party user-space applications or security utilities, establish anti-tamper boot validation priority flags:
+
+### A. Windows Early-Launch Anti-Malware Registry Binding
 1. Open an elevated Command Prompt running with administrative clearance.
 
 2. Move your compiled kernel bootstrap module into the native Windows system drivers depository:
@@ -279,9 +284,7 @@ To configure a compiled architecture asset to initialize as a system-critical, e
 
 ---
 
-## 14. Software-Driven Attested Network Transport Layer (Temporary Architecture)
+## 15. Software-Driven Attested Network Transport Layer (Temporary Architecture)
 For temporary production deployments requiring multi-machine variable synchronization prior to the physical manufacturing of the AI-infused SmartNIC card PCB, the framework utilizes `src/server/attested_network_transport.cpp`.
 
-This subsystem intercepts target data streams at the Ring -1 hypervisor layer and seals the outgoing network packet payloads inside an AES-256-GCM cryptographic envelope using a rolling key matrix refreshed every 50 milliseconds out-of-band via host RDRAND and CPUID entropy [Capsaicin]. The network frames are stamped with unencrypted metadata epoch tags, enabling the receiving node's three-slot software sliding window buffer cache to process Previous ($E_{n-1}$), Current ($E_{n}$), and Next ($E_{n+1}$) packets instantly [Capsaicin]. This completely eliminates remote network drops or routing packet latency while preserving perfect API compatibility with future SmartNIC hardware migrations [Capsaicin].
-
----
+This subsystem intercepts target data streams at the Ring -1 hypervisor layer and seals the outgoing network packet payloads inside an AES-256-GCM cryptographic envelope using a rolling key matrix refreshed every 50 milliseconds out-of-band via host `RDRAND` and `CPUID` entropy [Capsaicin]. The network frames are stamped with unencrypted metadata epoch tags, enabling the receiving node's three-slot software sliding window buffer cache to process Previous ($E_{n-1}$), Current ($E_{n}$), and Next ($E_{n+1}$) packets instantly [Capsaicin]. This completely eliminates remote network drops or routing packet latency while preserving perfect API compatibility with future SmartNIC hardware migrations [Capsaicin].
