@@ -17,8 +17,9 @@ jobs:
   validate-linux:
     runs-on: ubuntu-latest
     steps:
+    # FIXED PLATFORM TELEMETRY WARNING: Version tag resolves the underlying Node 20 sub-dependency hooks
     - name: Checkout Source Code Tree
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v4.2.3
 
     - name: Install Core Compilation Tools
       run: |
@@ -39,14 +40,13 @@ jobs:
   validate-windows:
     runs-on: windows-latest
     steps:
+    # FIXED PLATFORM TELEMETRY WARNING: Version tag resolves the underlying Node 20 sub-dependency hooks
     - name: Checkout Source Code Tree
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v4.2.3
 
-    # AUTOMATED MSVC SHELL ATTACHMENT: Initializes native developer environment variables on the runner
     - name: Configure Microsoft Visual C++ (MSVC) Developer Toolchain
-      uses: ilammy/msvc-dev-cmd@v1
+      uses: ilammy/msvc-dev-cmd@v1.13.0
 
-    # FIXED GENERATOR TARGET: Switches to Ninja compiler mapping to bypass missing Visual Studio instances
     - name: Configure CMake for Windows Target Nodes
       run: |
         mkdir build_win
