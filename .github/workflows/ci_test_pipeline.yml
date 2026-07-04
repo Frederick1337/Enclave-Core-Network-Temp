@@ -17,9 +17,9 @@ jobs:
   validate-linux:
     runs-on: ubuntu-latest
     steps:
-    # FIXED PLATFORM TELEMETRY WARNING: Version tag resolves the underlying Node 20 sub-dependency hooks
+    # RESTORED STABLE TAG: Pins compilation back to the verified system checkout baseline
     - name: Checkout Source Code Tree
-      uses: actions/checkout@v4.2.3
+      uses: actions/checkout@v4.2.2
 
     - name: Install Core Compilation Tools
       run: |
@@ -40,9 +40,9 @@ jobs:
   validate-windows:
     runs-on: windows-latest
     steps:
-    # FIXED PLATFORM TELEMETRY WARNING: Version tag resolves the underlying Node 20 sub-dependency hooks
+    # RESTORED STABLE TAG: Pins compilation back to the verified system checkout baseline
     - name: Checkout Source Code Tree
-      uses: actions/checkout@v4.2.3
+      uses: actions/checkout@v4.2.2
 
     - name: Configure Microsoft Visual C++ (MSVC) Developer Toolchain
       uses: ilammy/msvc-dev-cmd@v1.13.0
