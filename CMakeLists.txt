@@ -26,7 +26,8 @@ else()
     add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie)
     
     # Applied STRICTLY to C++ translation units only to prevent the cc1 C-language RTTI crash
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti -fno-exceptions>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
 endif()
 
 file(GLOB_RECURSE SOURCE_FILES 
