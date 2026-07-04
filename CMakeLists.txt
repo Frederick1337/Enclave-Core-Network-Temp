@@ -22,18 +22,26 @@ if(MSVC)
     add_compile_options(/W4 /WX /GR- /EHs-c- /GS- /wd4201 /std:c++20 /Oi)
     add_link_options(/DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry)
 else()
-    # FIXED TARGET COMPILATION FLAG: Changed -mrdrand to the correct compiler argument -mrdrnd
     add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie -mrdrnd)
-    
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
 endif()
 
-# AUTOMATED PATH DISCOVERY LAYER: Recursively maps existing source files (.cpp, .c)
+# AUTOMATED PATH DISCOVERY LAYER: Recursively maps existing source files
 file(GLOB_RECURSE SOURCE_FILES 
     "src/*.cpp" 
     "src/*.c"
 )
+
+# KERNEL WRAPPER EXCLUSION GATEWAY: Removes bare-metal boot files from the build array 
+# unless explicitly compiling in a true bare-metal kernel-level build ecosystem.
+if(NOT DEFINED ENCLAVE_COMPILE_BARE_METAL)
+    foreach(FILE_PATH ${SOURCE_FILES})
+        if(FILE_PATH MATCHES "src/boot/")
+            list(REMOVE_ITEM SOURCE_FILES ${FILE_PATH})
+        endif()
+    endforeach()
+endif()
 
 if(NOT SOURCE_FILES)
     set(EMPTY_FALLBACK_FILE ${CMAKE_CURRENT_BINARY_DIR}/enclave_generated_init.cpp)
