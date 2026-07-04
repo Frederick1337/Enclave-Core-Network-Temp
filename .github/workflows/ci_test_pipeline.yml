@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # FIXED DEPRECATION WARNING: Upgraded checkout sequence to native v4 (Node 24 compliant)
+    # FIXED SUB-DEPENDENCY WARNING: Pinned to explicit minor release to clear underlying Node 20 hooks
     - name: Checkout Source Code Tree
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.1.7
 
     - name: Install Netwide Assembler (NASM) and Core Compilation Tools
       run: |
