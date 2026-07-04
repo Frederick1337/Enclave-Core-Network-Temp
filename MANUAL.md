@@ -89,6 +89,19 @@ When compiling the application and linking against the network-enabled static ob
 - **For Linux GCC/Clang Build Toolchains:** Append `-DENCLAVE_SOFTWARE_NETWORK_TRANSIT=1`
 - **For Windows MSVC Build Toolchains:** Append `/DENCLAVE_SOFTWARE_NETWORK_TRANSIT=1`
 
+#### Step 6: Binary Library Linkage
+Once your source compilation is complete, you must explicitly instruct your project's linker to ingest the compiled Enclave static binary objects to resolve low-level hypercall and transport symbols:
+
+- **For Windows MSVC Environments:**  
+  Open your client application's project properties inside Visual Studio, navigate to `Linker -> General -> Additional Library Directories`, and add the path to your compiled Windows artifacts folder:
+  > build_win/bin/Release/
+  Then, navigate to `Linker -> Input -> Additional Dependencies` and append your static library token directly to the string list:
+  > enclave_system_node.lib (or enclave_core_node.lib)
+
+- **For Linux GCC/Clang Environments:**  
+  When invoking your final application compilation pass via the command line or a local Makefile, you must append the absolute library search path (`-L`) and link the static binary archive directly via the library flag (`-l`):
+  > g++ main.o -Lbuild_intel/bin/ -lenclave_system_node -lpthread -o my_client_app
+
 ---
 
 ## 4. Hardware Stress-Testing Diagnostics
