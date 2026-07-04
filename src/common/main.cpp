@@ -29,30 +29,34 @@ struct GuestRegisters;
 class HardwareAuditor {
 public:
     static uint32_t DetectVendor() {
+        uint32_t ebx_val = 0;
         #if defined(_MSC_VER)
         int cpu_info[4] = {0};
         __cpuid(cpu_info, 0);
-        uint32_t ebx = static_cast<uint32_t>(cpu_info[1]);
+        ebx_val = static_cast<uint32_t>(cpu_info[1]);
         #else
         uint32_t eax=0, ebx=0, ecx=0, edx=0;
         __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(0));
+        ebx_val = ebx;
         #endif
 
-        if (ebx == 0x756e6547) return 1; // GenuineIntel
-        if (ebx == 0x68747541) return 2; // AuthenticAMD
+        if (ebx_val == 0x756e6547) return 1; // GenuineIntel
+        if (ebx_val == 0x68747541) return 2; // AuthenticAMD
         return 0;
     }
     
     static bool CheckHypervisor() {
+        uint32_t ecx_val = 0;
         #if defined(_MSC_VER)
         int cpu_info[4] = {0};
         __cpuid(cpu_info, 1);
-        uint32_t ecx = static_cast<uint32_t>(cpu_info[2]);
+        ecx_val = static_cast<uint32_t>(cpu_info[2]);
         #else
         uint32_t eax=0, ebx=0, ecx=0, edx=0;
         __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(1));
+        ecx_val = ecx;
         #endif
-        return (ecx & (1ULL << 31)); 
+        return (ecx_val & (1ULL << 31)); 
     }
 
     // Pulls the physical processor's factory-fused 64-bit unique serial number footprint
@@ -77,10 +81,12 @@ public:
         // Failsafe hardware stabilization mapping if low-level leaf returns null or disabled
         if (silicon_id == 0) {
             #if defined(_MSC_VER)
+            int cpu_info[4] = {0};
             __cpuid(cpu_info, 1);
             uint32_t eax_val = static_cast<uint32_t>(cpu_info[0]);
             uint32_t edx_fallback = static_cast<uint32_t>(cpu_info[3]);
             #else
+            uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
             __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(1));
             uint32_t eax_val = eax;
             uint32_t edx_fallback = edx;
@@ -114,7 +120,8 @@ public:
         }
 
         #if defined(_MSC_VER)
-        __disable();
+        // FIXED MICROSOFT NAMING CONVENTION TYPO: Single leading underscore maps _disable() intrinsic natively
+        _disable();
         while (true) { }
         #else
         __asm__ __volatile__("cli; hlt");
