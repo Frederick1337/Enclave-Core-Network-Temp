@@ -37,7 +37,7 @@ The SDK must be structured inside your production project workspace precisely ac
     ├── 📁 include/
     │   ├── enclave_core.h          (Local Ring -1 Anchor Interface)
     │   ├── hardware_diagnostic.h    (Telemetry & Context Validation)
-    │   └── attested_network.h       (Ephemeral 50ms Rolling-Epoch Cipher)
+    │   └── attested_network_transport.h       (Ephemeral 50ms Rolling-Epoch Cipher)
     └── 📁 lib/
         ├── enclave_core_node.lib   (Windows MSVC Static Object Library)
         └── libenclave_system_node.a (Linux GCC Static Archive Asset)
@@ -50,7 +50,7 @@ Extract `attested_network.h` from your network repository source tree and place 
 ```cpp
 #include "enclave_sdk/include/enclave_core.h"
 #include "enclave_sdk/include/hardware_diagnostic.h"
-#include "enclave_sdk/include/attested_network.h"
+#include "enclave_sdk/include/attested_network_transport.h"
 ```
 
 #### Step 2: Environment Verification
