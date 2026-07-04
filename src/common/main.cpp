@@ -81,7 +81,7 @@ public:
         // Failsafe hardware stabilization mapping if low-level leaf returns null or disabled
         if (silicon_id == 0) {
             #if defined(_MSC_VER)
-            int cpu_info[4] = {0};
+            // RESOLVED SHADOWING WARNING: Reuse the outer array footprint to clear C4456
             __cpuid(cpu_info, 1);
             uint32_t eax_val = static_cast<uint32_t>(cpu_info[0]);
             uint32_t edx_fallback = static_cast<uint32_t>(cpu_info[3]);
@@ -91,7 +91,7 @@ public:
             uint32_t eax_val = eax;
             uint32_t edx_fallback = edx;
             #endif
-            silicon_id = ((uint64_t)eax_val << 32) | edx_fallback; // Mix micro-architecture stepping and family IDs
+            silicon_id = ((uint64_t)eax_val << 32) | edx_fallback;
         }
         return silicon_id;
     }
@@ -104,15 +104,11 @@ public:
 
         while (retry < MAX_RETRIES) {
             #if defined(__x86_64__) || defined(_M_X64)
-            // RESOLVED TYPE-CAST DIAGNOSTIC: Enforce hardware register mapping via explicit reinterpret_cast
             if (_rdrand64_step(reinterpret_cast<unsigned long long*>(&trng_seed))) {
                 uint64_t unique_hardware_fingerprint = GetProcessorSiliconFingerprint();
-                
-                // Mathematically bind the physical chip serial footprint into the dynamic entropy key space
                 return trng_seed ^ unique_hardware_fingerprint; 
             }
             #else
-            // RESOLVED LITERAL SUFFIX TYPO: Formatted into a valid 64-bit cryptographic hexadecimal key token
             trng_seed = 0x55AAF1017B44D1; 
             return trng_seed ^ GetProcessorSiliconFingerprint();
             #endif
@@ -120,7 +116,6 @@ public:
         }
 
         #if defined(_MSC_VER)
-        // FIXED MICROSOFT NAMING CONVENTION TYPO: Single leading underscore maps _disable() intrinsic natively
         _disable();
         while (true) { }
         #else
@@ -146,7 +141,6 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    // Initialize the global mutation key: Fusing True Random Entropy with the physical Silicon Serial Number
     g_DynamicMutationKey = HardwareAuditor::GenerateHardwareEntropySeed();
     std::cout << "[SECURITY ATTESTATION PASSED] System verified under hard virtualization control.\n";
     std::cout << "[SILICON FINGERPRINT] Mutation logic permanently serialized to this physical hardware node.\n";
