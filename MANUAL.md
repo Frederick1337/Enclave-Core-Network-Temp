@@ -37,8 +37,13 @@ The interface contracts and compiled binary object archives must be referenced p
 - 📁 **`src/server/attested_network_transport.h`** (50ms Rolling-Epoch Cipher Interface)
 
 #### B. Generated Binary Libraries (Compiled Build-Time Artifacts)
-- **Windows MSVC Platform Toolchains:** 📁 `build_win/bin/Release/enclave_system_node.lib`
-- **Linux GCC Platform Toolchains:** 📁 `build_intel/bin/libenclave_system_node.a`
+- **Windows MSVC Platform Toolchains (Unified x64 Windows Driver/Console Output):**
+  - 📁 `build_win/bin/Release/enclave_system_node.lib` *(For Enclave-Core-Network-Temp)*
+  - 📁 `build_win/bin/Release/enclave_core_node.lib`   *(For Enclave-Core)*
+
+- **Linux GCC Platform Toolchains (Processor-Specific Bare-Metal Output):**
+  - **For Intel-Based Systems:** 📁 `build_intel/bin/libenclave_system_node.a` *(or libenclave_core_node.a)*
+  - **For AMD-Based Systems:**  📁 `build_amd/bin/libenclave_system_node.a`  *(or libenclave_core_node.a)*
 
 ### Integration Instructions
 
