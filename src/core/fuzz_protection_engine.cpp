@@ -21,7 +21,8 @@ public:
         : sequential_probe_counter(0), last_accessed_physical_page(0), master_lombardi_key(key) {}
 
     bool EvaluateMemoryAccessPattern(uint64_t target_physical_page, bool is_write_operation, bool is_intel_arch, void* arch_control_block) {
-        if (master_lombardi_key != 0x55AAFJLOMBARDI) {
+        // RESOLVED LITERAL SUFFIX TYPO: Token mapped to a valid 64-bit cryptographic hexadecimal format
+        if (master_lombardi_key != 0x55AAF1017B44D1) {
             return false;
         }
 

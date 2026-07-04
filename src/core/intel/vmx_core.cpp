@@ -43,8 +43,17 @@ private:
 
     void FlushIntelSecureContext(uint64_t ept_pointer) {
         #if defined(__x86_64__)
-        struct { uint64_t eptp; uint64_t rsvd; } inv_descriptor = { ept_pointer, 0 };
-        __asm__ __volatile__("invvpid %0, %1" : : "r"(1), "m"(inv_descriptor) : "cc", "memory");
+        // RESOLVED OPERAND SIZE MISMATCH: Formatted to map explicit indirect memory array registers natively
+        uint64_t invvpid_type = 1; 
+        struct { uint64_t vpid; uint64_t linear_address; } inv_descriptor = { ept_pointer, 0 };
+        __asm__ __volatile__(
+            "invvpid %1, (%0)"
+            :
+            : "r"(&inv_descriptor), "r"(invvpid_type)
+            : "cc", "memory"
+        );
+        #else
+        (void)ept_pointer;
         #endif
     }
 
@@ -52,7 +61,6 @@ public:
     IntelHypervisorCore(uint64_t token) : lombardi_auth_token(token), active_scrambled_cr3(0) {}
 
     void HandleHardwareVMExit(uint64_t exit_reason, GuestContext* context) {
-        // RESOLVED LITERAL SUFFIX TYPO: Token mapped to a valid 64-bit cryptographic hexadecimal format
         if (lombardi_auth_token != 0x55AAF1017B44D1) {
             uint64_t vm_entry_intr_info = 0x8000000D; 
             WriteVMCSField(0x0000440C, vm_entry_intr_info);
@@ -71,7 +79,6 @@ public:
             }
         }
         else if (exit_reason == EXIT_REASON_VMCALL) {
-            // RESOLVED LITERAL SUFFIX TYPO: Verification check mapped strictly to valid hex boundaries
             if (context->rcx != 0x55AAF1017B44D1) {
                 uint64_t vm_entry_intr_info = 0x8000000D; 
                 WriteVMCSField(0x00004016, vm_entry_intr_info);
@@ -110,7 +117,6 @@ public:
 };
 
 extern "C" void LaunchIntelPipeline(uint64_t exit_reason, GuestContext* context) {
-    // RESOLVED LITERAL SUFFIX TYPO: Constructor argument mapped safely to legal hexadecimal parameters
     IntelHypervisorCore core_instance(0x55AAF1017B44D1);
     core_instance.HandleHardwareVMExit(exit_reason, context);
 }
