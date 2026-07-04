@@ -17,7 +17,8 @@ add_compile_definitions(ENCLAVE_SOFTWARE_NETWORK_TRANSIT=1)
 set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 
 if(MSVC)
-    add_compile_options(/W4 /WX /GR- /EHs-c- /GS- /wd4201 /std:c++20 /Oi)
+    # FIXED WINDOWS COMPILATION: Replaced /EHs-c- with /EHsc to stabilize standard library streams
+    add_compile_options(/W4 /WX /GR- /EHsc /GS- /wd4201 /std:c++20 /Oi)
     add_link_options(/DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry)
 else()
     add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie -mrdrnd)

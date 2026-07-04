@@ -9,6 +9,10 @@
 #include <cstdlib>
 #include <immintrin.h> // Required for RDRAND hardware intrinsic functions
 
+#if defined(_MSC_VER)
+#include <intrin.h>    // Required for Microsoft native CPUID and hardware management intrinsics
+#endif
+
 struct SystemTopology {
     uint32_t cpu_vendor; // 1 = Intel, 2 = AMD
     bool vmm_active;
@@ -25,31 +29,63 @@ struct GuestRegisters;
 class HardwareAuditor {
 public:
     static uint32_t DetectVendor() {
+        #if defined(_MSC_VER)
+        int cpu_info[4] = {0};
+        __cpuid(cpu_info, 0);
+        uint32_t ebx = static_cast<uint32_t>(cpu_info[1]);
+        #else
         uint32_t eax=0, ebx=0, ecx=0, edx=0;
         __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(0));
+        #endif
+
         if (ebx == 0x756e6547) return 1; // GenuineIntel
         if (ebx == 0x68747541) return 2; // AuthenticAMD
         return 0;
     }
     
     static bool CheckHypervisor() {
+        #if defined(_MSC_VER)
+        int cpu_info[4] = {0};
+        __cpuid(cpu_info, 1);
+        uint32_t ecx = static_cast<uint32_t>(cpu_info[2]);
+        #else
         uint32_t eax=0, ebx=0, ecx=0, edx=0;
         __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(1));
+        #endif
         return (ecx & (1ULL << 31)); 
     }
 
     // Pulls the physical processor's factory-fused 64-bit unique serial number footprint
     static uint64_t GetProcessorSiliconFingerprint() {
+        uint32_t ecx_val = 0;
+        uint32_t edx_val = 0;
+
+        #if defined(_MSC_VER)
+        int cpu_info[4] = {0};
+        __cpuid(cpu_info, 3);
+        ecx_val = static_cast<uint32_t>(cpu_info[2]);
+        edx_val = static_cast<uint32_t>(cpu_info[3]);
+        #else
         uint32_t eax = 0, ebx = 0, ecx = 0, edx = 0;
-        // Query CPUID leaf 3 (Processor Serial Number - if supported or fallback to chip signature matrices)
         __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(3));
+        ecx_val = ecx;
+        edx_val = edx;
+        #endif
         
-        uint64_t silicon_id = ((uint64_t)edx << 32) | ecx;
+        uint64_t silicon_id = ((uint64_t)edx_val << 32) | ecx_val;
         
         // Failsafe hardware stabilization mapping if low-level leaf returns null or disabled
         if (silicon_id == 0) {
+            #if defined(_MSC_VER)
+            __cpuid(cpu_info, 1);
+            uint32_t eax_val = static_cast<uint32_t>(cpu_info[0]);
+            uint32_t edx_fallback = static_cast<uint32_t>(cpu_info[3]);
+            #else
             __asm__ __volatile__("cpuid" : "=a"(eax), "=b"(ebx), "=c"(ecx), "=d"(edx) : "a"(1));
-            silicon_id = ((uint64_t)eax << 32) | edx; // Mix micro-architecture stepping and family IDs
+            uint32_t eax_val = eax;
+            uint32_t edx_fallback = edx;
+            #endif
+            silicon_id = ((uint64_t)eax_val << 32) | edx_fallback; // Mix micro-architecture stepping and family IDs
         }
         return silicon_id;
     }
@@ -77,7 +113,12 @@ public:
             retry++;
         }
 
+        #if defined(_MSC_VER)
+        __disable();
+        while (true) { }
+        #else
         __asm__ __volatile__("cli; hlt");
+        #endif
         return 0; 
     }
 };
