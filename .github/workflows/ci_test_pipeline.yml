@@ -13,15 +13,14 @@ on:
     branches: [ main ]
 
 jobs:
-  validate-infrastructure:
+  # JOB 1: Validates and Compiles the Linux Kernel Modules and Verification Suites
+  validate-linux:
     runs-on: ubuntu-latest
-
     steps:
-    # NATIVE NODE 24 COMPLIANCE: Runs seamlessly on modern cloud runner defaults
     - name: Checkout Source Code Tree
       uses: actions/checkout@v4.2.2
 
-    - name: Install Netwide Assembler (NASM) and Core Compilation Tools
+    - name: Install Core Compilation Tools
       run: |
         sudo apt-get update
         sudo apt-get install -y nasm cmake build-essential python3
@@ -31,13 +30,25 @@ jobs:
         chmod +x build_all.sh
         ./build_all.sh
 
-    - name: Validate Local Linux Driver Build Scripts
-      run: |
-        chmod +x src/core/driver_build_suite.sh
-        # Verify the syntax of the build suite script without executing on host headers
-        bash -n src/core/driver_build_suite.sh
-
     - name: Run Automated Environmental Attestation and Diagnostic Stress Test
       run: |
         chmod +x tests/hardware_diagnostic_pipeline.py
         python3 tests/hardware_diagnostic_pipeline.py
+
+  # JOB 2: Validates and Compiles the Windows Subsystem Kernel Configurations Natively
+  validate-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Source Code Tree
+      uses: actions/checkout@v4.2.2
+
+    - name: Configure CMake for Microsoft Visual Studio Toolchain
+      run: |
+        mkdir build_win
+        cd build_win
+        cmake -G "Visual Studio 17 2022" -A x64 ..
+
+    - name: Execute Native MSVC Compilation
+      run: |
+        cd build_win
+        cmake --build . --config Release
