@@ -19,8 +19,12 @@ set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 if(MSVC)
     add_compile_options(/W4 /WX /GR- /EHsc /GS- /wd4201 /std:c++20 /Oi)
     
-    # FIXED LINKER OPTIMIZATION SYSTEM: Explicitly adds /MANIFEST:NO to satisfy kernel-driver bounds
-    add_link_options(/DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry /MANIFEST:NO)
+    # Platform Detection Logic: If compiling in pure bare-metal kernel modes, enforce native driver linking parameters
+    if(DEFINED ENCLAVE_COMPILE_BARE_METAL)
+        add_link_options(/DRIVER /SUBSYSTEM:NATIVE /ENTRY:DriverEntry /MANIFEST:NO)
+    else()
+        add_link_options(/SUBSYSTEM:CONSOLE)
+    endif()
 else()
     add_compile_options(-Wall -Wextra -Werror -fno-stack-protector -O2 -mcmodel=kernel -fno-pic -fno-pie -mrdrnd)
     add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
@@ -63,7 +67,10 @@ target_include_directories(enclave_system_node PUBLIC
 )
 
 if(WIN32)
-    target_link_libraries(enclave_system_node PUBLIC ntoskrnl.lib hal.lib wdfdriverstub.lib)
+    # Only link raw WDK components if the target flag is actively enforced for kernel distribution targets
+    if(DEFINED ENCLAVE_COMPILE_BARE_METAL)
+        target_link_libraries(enclave_system_node PUBLIC ntoskrnl.lib hal.lib wdfdriverstub.lib)
+    endif()
 else()
     target_link_libraries(enclave_system_node PUBLIC pthread)
 endif()
