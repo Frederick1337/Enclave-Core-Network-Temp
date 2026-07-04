@@ -35,12 +35,13 @@ private:
     uint64_t proprietary_architect_token;
 
     uint64_t PullHardwareEntropy() {
-        uint32_t high = 0, low = 0;
         #if defined(_MSC_VER)
         // FIXED MSVC RDTSC: Native Microsoft 64-bit Timestamp Counter interface read
         uint64_t tsc = __rdtsc();
         return tsc ^ g_DynamicMutationKey;
         #elif defined(__x86_64__) || defined(_M_X64)
+        // FIXED UNREFERENCED VARIABLE WARNING: Scope-restricted to GCC block to clear C4189
+        uint32_t high = 0, low = 0;
         __asm__ __volatile__("rdtsc" : "=a"(low), "=d"(high));
         return (((uint64_t)high << 32) | low) ^ g_DynamicMutationKey;
         #else
